@@ -9,7 +9,7 @@ export const HeroSection = () => {
         <div className="w-full h-full">
           <img
             src={heroImage}
-            alt="Luxury Beverly Hills Estate"
+            alt="Luxury Orlando Estate"
             className="w-full h-full object-cover"
           />
         </div>
