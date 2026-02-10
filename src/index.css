@@ -1,0 +1,328 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* RealEstate 360 Brighter Color Palette */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%;
+
+    /* Lighter charcoal primary */
+    --primary: 0 0% 20%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Brighter gray secondary */
+    --secondary: 0 0% 97%;
+    --secondary-foreground: 0 0% 25%;
+
+    /* Lighter muted tones */
+    --muted: 0 0% 97%;
+    --muted-foreground: 0 0% 50%;
+
+    /* Brighter warm gold accent */
+    --accent: 43 65% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
+    --ring: 43 65% 55%;
+
+    --radius: 0px;
+
+    /* Custom luxury tokens - brighter */
+    --gold: 43 65% 55%;
+    --gold-light: 43 65% 65%;
+    --gold-dark: 43 65% 45%;
+    --charcoal: 0 0% 20%;
+    --charcoal-light: 0 0% 35%;
+    --cream: 40 40% 98%;
+
+    /* Lighter Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.08);
+    --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.15);
+
+    /* Typography */
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
+
+    /* Sidebar - brighter */
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 0 0% 30%;
+    --sidebar-primary: 0 0% 20%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 97%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 0 0% 93%;
+    --sidebar-ring: 43 65% 55%;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 15%;
+
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 43 65% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 43 65% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  /* Ken Burns Animation */
+  @keyframes ken-burns {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1.1);
+    }
+  }
+
+  .animate-ken-burns {
+    animation: ken-burns 20s ease-out forwards;
+  }
+
+  /* Fade up animation */
+  @keyframes fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.6s ease-out forwards;
+  }
+
+  /* Stagger delays */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+
+  /* Nav link underline animation */
+  .nav-link {
+    @apply relative;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-[1px] bg-accent origin-left scale-x-0 transition-transform duration-300;
+  }
+
+  .nav-link:hover::after {
+    @apply scale-x-100;
+  }
+
+  /* Property card hover */
+  .property-card {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  .property-card:hover {
+    @apply shadow-lg;
+    transform: translateY(-4px);
+  }
+
+  .property-card:hover .property-image {
+    transform: scale(1.05);
+  }
+
+  .property-image {
+    @apply transition-transform duration-700 ease-out;
+  }
+
+  /* Gold button styles */
+  .btn-gold {
+    @apply bg-accent text-white px-8 py-4 font-sans text-sm tracking-widest uppercase transition-all duration-300;
+  }
+
+  .btn-gold:hover {
+    @apply bg-gold-dark shadow-lg;
+    transform: translateY(-2px);
+  }
+
+  /* Serif heading styles */
+  .heading-display {
+    font-family: var(--font-serif);
+    @apply tracking-tight;
+  }
+
+  /* Stats number style */
+  .stat-number {
+    font-family: var(--font-serif);
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tight;
+  }
+
+  /* Marquee animation */
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% / 2));
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 25s linear infinite;
+    display: flex;
+  }
+
+  /* Backdrop blur nav */
+  .nav-blur {
+    @apply backdrop-blur-md bg-white/90;
+  }
+
+  .nav-transparent {
+    @apply bg-transparent;
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Text shadow for hero - lighter */
+  .text-shadow {
+    text-shadow: 0 2px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Gradient overlays - lighter */
+  .overlay-gradient {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 100%);
+  }
+
+  /* Gold shadow utility */
+  .shadow-gold {
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+  }
+
+  /* Badge style */
+  .badge-sale {
+    @apply text-xs tracking-[0.2em] uppercase font-sans font-medium;
+  }
+}
+
+/* ============================================
+   IDX BROKER DARK MODE / CYBERPUNK STYLES
+   Paste this in IDX Broker: Design → Website → Custom CSS
+   ============================================ */
+
+/* Force Dark Mode on IDX Container */
+#idx-main-container {
+    background-color: #000000 !important;
+    color: #e0e0e0 !important;
+}
+
+/* Listings Cards */
+.IDX-resultsCell {
+    background: #111 !important;
+    border: 1px solid #333 !important;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.1); /* Subtle Green Glow */
+}
+
+/* Text Overrides */
+.IDX-resultsAddress, .IDX-resultsPrice {
+    color: #fff !important;
+    font-family: 'Courier New', monospace; /* Hacker Font */
+}
+
+/* Inputs & Dropdowns */
+.IDX-quickSearchForm input, .IDX-quickSearchForm select {
+    background-color: #222 !important;
+    color: #0f0 !important; /* Terminal Green Text */
+    border: 1px solid #444 !important;
+}
+
+/* Map Fixes */
+#IDX-mapContainer {
+    filter: invert(90%) hue-rotate(180deg); /* Makes Google Maps Dark Mode */
+}
+
+/* Additional IDX Dark Mode Overrides */
+.IDX-wrapper {
+    background-color: #000000 !important;
+    color: #e0e0e0 !important;
+}
+
+.IDX-searchForm {
+    background-color: #111 !important;
+    border: 1px solid #333 !important;
+}
+
+.IDX-btn {
+    background-color: #0f0 !important;
+    color: #000 !important;
+    border: none !important;
+}
+
+.IDX-btn:hover {
+    background-color: #00cc00 !important;
+}

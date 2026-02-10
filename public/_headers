@@ -1,0 +1,12 @@
+# Netlify / Static hosting CORS headers
+# These headers apply to all routes
+
+/*
+  Access-Control-Allow-Origin: https://realestate360.realtor
+  Access-Control-Allow-Origin: https://www.realestate360.realtor
+  Access-Control-Allow-Methods: GET, POST, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization
+  Access-Control-Allow-Credentials: true
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
