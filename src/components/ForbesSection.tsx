@@ -20,20 +20,29 @@ export const ForbesSection = () => {
         
         {/* New Two Column Section */}
         <div className="grid md:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 mt-10 sm:mt-16 md:mt-20 items-center">
-          {/* Left Side - Image */}
+          {/* Left Side - Image with Button */}
           <div
-            className="order-2 md:order-1"
+            className="order-2 md:order-1 flex flex-col items-center"
           >
-            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+            <div className="relative overflow-hidden rounded-2xl shadow-2xl w-full">
               <img 
                 src="/image.png" 
                 alt="Real Estate 360" 
                 className="w-full h-auto object-contain"
               />
             </div>
+            {/* Know More Button - Under image on mobile, hidden on desktop */}
+            <div className="mt-6 sm:mt-8 md:hidden">
+              <Link 
+                to="/about" 
+                className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-primary text-white font-sans font-medium rounded-md hover:bg-primary-dark transition-colors duration-200 text-sm sm:text-base"
+              >
+                Know More
+              </Link>
+            </div>
           </div>
           
-          {/* Right Side - Content with Button */}
+          {/* Right Side - Content with Button (Desktop only) */}
           <div
             className="order-1 md:order-2"
           >
@@ -46,7 +55,8 @@ export const ForbesSection = () => {
                 Our reputation is built on trust, integrity, and long-lasting partnerships. Whether you're purchasing your first home or expanding your investment footprint, we provide the expertise, insights, and opportunities needed to achieve your goals.
               </p>
               
-              <div className="mt-6 sm:mt-8">
+              {/* Know More Button - Desktop only */}
+              <div className="mt-6 sm:mt-8 hidden md:block">
                 <Link 
                   to="/about" 
                   className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-primary text-white font-sans font-medium rounded-md hover:bg-primary-dark transition-colors duration-200 text-sm sm:text-base"
