@@ -1,80 +1,101 @@
-import heroImage from '/herosection.png';
 import { MlsSearchBox } from './MlsSearchBox';
+import { motion } from 'framer-motion';
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } }
+};
+
+const fadeInLeft = {
+  hidden: { opacity: 0, x: -30 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: 'easeOut' } }
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 1, ease: 'easeOut' } }
+};
 
 export const HeroSection = () => {
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0">
+      {/* Background Video */}
+      <motion.div 
+        className="absolute inset-0"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
         <div className="w-full h-full">
-          <img
-            src={heroImage}
-            alt="Luxury Orlando Estate"
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
             className="w-full h-full object-cover"
-          />
+          >
+            <source src="/herosection.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
-        {/* Overlay Gradient - Lighter for brighter appearance */}
+        {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/50" />
-      </div>
+      </motion.div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 h-full flex flex-col justify-between px-4 sm:px-6 md:px-12 lg:px-16 py-6 sm:py-8">
+      <div className="relative z-10 h-full flex flex-col justify-center items-center px-4 sm:px-6 md:px-12 lg:px-16 py-6 sm:py-8">
         
-        {/* Top Spacer for Navigation */}
-        <div className="h-14 sm:h-16" />
+        {/* Center - Find Your Dream Home + Search Box (TOP) */}
+        <motion.div 
+          className="flex flex-col items-center justify-center w-full mb-8 sm:mb-12 relative"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+        >
+          {/* Ambient Glow behind search and heading */}
+          <div className="absolute inset-0 -z-10 bg-black/40 blur-[100px] rounded-full scale-110 opacity-60" />
 
-        {/* Center - Premium Hero Content */}
-        <div className="flex-1 flex flex-col items-center justify-start pt-8 sm:pt-12 md:pt-16 w-full max-w-5xl mx-auto px-2 sm:px-0">
-          
-          {/* Premium Text Section */}
-          <div className="text-center mb-8 sm:mb-12">
-            {/* Subtitle with decorative line */}
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="h-px w-12 sm:w-16 bg-gradient-to-r from-transparent via-accent to-transparent drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
-              <span className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-accent font-sans drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]"
-              >
-                Luxury Real Estate
-              </span>
-              <div className="h-px w-12 sm:w-16 bg-gradient-to-r from-transparent via-accent to-transparent drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
-            </div>
-
-            {/* Main Heading */}
-            <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white font-normal tracking-tight leading-tight drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)]"
-            >
-              <span className="text-[#FFD700] drop-shadow-[0_6px_20px_rgba(0,0,0,0.9)] text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">Orlando & Central Florida's</span>
-              <br />
-              <span className="text-white drop-shadow-[0_6px_20px_rgba(0,0,0,0.9)]">Real Estate Experts</span>
-            </h1>
-
-            {/* Description - Hidden on mobile */}
-            <p className="hidden sm:block mt-4 sm:mt-6 font-sans text-sm sm:text-base md:text-lg text-white/90 leading-relaxed max-w-2xl mx-auto drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]"
-            >
-              With 35+ years of experience, Real Estate 360 delivers exceptional results
-              for buyers, sellers, and investors throughout Central Florida.
-            </p>
-
-            {/* CTA Heading */}
-            <h2 className="font-serif text-lg sm:text-xl md:text-2xl lg:text-3xl text-white font-normal tracking-wide mt-6 sm:mt-8 drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]"
+          {/* CTA Heading with Luxury Gold Lines */}
+          <div className="flex items-center justify-center gap-3 sm:gap-6 mb-8 sm:mb-10 relative py-2 w-full max-w-[90vw] sm:max-w-none">
+            {/* Soft text shadow/glow */}
+            <div className="absolute inset-0 bg-black/20 blur-2xl rounded-full" />
+            <div className="h-px w-8 sm:w-20 md:w-24 bg-gradient-to-r from-transparent via-[#FFD700] to-transparent relative z-10 flex-shrink" />
+            <h2 className="font-serif text-lg sm:text-2xl md:text-3xl lg:text-4xl text-[#FFD700] font-normal tracking-[0.1em] sm:tracking-wide relative z-10 drop-shadow-[0_2px_15px_rgba(0,0,0,0.6)] whitespace-nowrap"
             >
               Find Your Dream Home
             </h2>
+            <div className="h-px w-8 sm:w-20 md:w-24 bg-gradient-to-r from-transparent via-[#FFD700] to-transparent relative z-10 flex-shrink" />
           </div>
           
           {/* Premium Search Box */}
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-4xl relative">
+            <div className="absolute -inset-4 bg-black/10 blur-3xl rounded-full -z-10" />
             <MlsSearchBox />
           </div>
-        </div>
+        </motion.div>
 
-        {/* Bottom Spacer */}
-        <div className="pb-8 sm:pb-12 md:pb-16" />
-      </div>
+        {/* Bottom Left - Other Content */}
+        <motion.div 
+          className="absolute bottom-8 sm:bottom-12 md:bottom-16 left-4 sm:left-6 md:left-12 lg:left-16 text-left max-w-lg"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInLeft}
+        >
+          {/* Main Heading */}
+          <h1 className="font-serif text-lg sm:text-xl md:text-2xl lg:text-3xl text-white font-normal tracking-tight leading-tight relative"
+          >
+            <span className="text-[#FFD700] text-xl sm:text-2xl md:text-3xl lg:text-4xl">Orlando & Central Florida's</span>
+            <br />
+            <span className="text-white">Real Estate Experts</span>
+          </h1>
 
-      {/* Bottom Center - Scroll Indicator */}
-      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
-        <div className="w-5 h-8 sm:w-6 sm:h-10 border border-white/40 rounded-full flex justify-center pt-1.5 sm:pt-2">
-          <div className="w-0.5 h-1.5 sm:h-2 bg-accent rounded-full" />
-        </div>
+          {/* Description - Hidden on mobile */}
+          <p className="hidden sm:block mt-2 sm:mt-3 font-sans text-xs sm:text-sm text-white/90 leading-relaxed max-w-sm"
+          >
+            With 35+ years of experience, Real Estate 360 delivers exceptional results
+            for buyers, sellers, and investors throughout Central Florida.
+          </p>
+        </motion.div>
       </div>
     </section>
   );

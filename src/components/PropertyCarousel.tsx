@@ -80,10 +80,10 @@ export const PropertyCarousel = ({ properties }: PropertyCarouselProps) => {
         <button
           onClick={handlePrev}
           disabled={currentIndex === 0}
-          className={`p-3 rounded-full border-2 border-accent transition-all duration-300 ${
+          className={`p-4 rounded-full border border-accent/30 backdrop-blur-md transition-all duration-300 ${
             currentIndex === 0
-              ? 'opacity-50 cursor-not-allowed border-gray-400'
-              : 'hover:bg-accent hover:text-white cursor-pointer'
+              ? 'opacity-30 cursor-not-allowed grayscale'
+              : 'hover:bg-accent hover:text-white cursor-pointer bg-white/5 shadow-lg shadow-accent/10'
           }`}
           aria-label="Previous properties"
         >
@@ -92,10 +92,10 @@ export const PropertyCarousel = ({ properties }: PropertyCarouselProps) => {
         <button
           onClick={handleNext}
           disabled={currentIndex >= maxIndex}
-          className={`p-3 rounded-full border-2 border-accent transition-all duration-300 ${
+          className={`p-4 rounded-full border border-accent/30 backdrop-blur-md transition-all duration-300 ${
             currentIndex >= maxIndex
-              ? 'opacity-50 cursor-not-allowed border-gray-400'
-              : 'hover:bg-accent hover:text-white cursor-pointer'
+              ? 'opacity-30 cursor-not-allowed grayscale'
+              : 'hover:bg-accent hover:text-white cursor-pointer bg-white/5 shadow-lg shadow-accent/10'
           }`}
           aria-label="Next properties"
         >
@@ -129,7 +129,7 @@ export const PropertyCarousel = ({ properties }: PropertyCarouselProps) => {
               <Link
                 key={property.id}
                 to={property.linkUrl || '/search'}
-                className="relative group cursor-pointer overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-500"
+                className="relative group cursor-pointer overflow-hidden rounded-2xl shadow-2xl transition-all duration-500 hover:-translate-y-2"
                 style={{ height: '400px' }}
               >
                 {/* Property Image */}
@@ -138,6 +138,10 @@ export const PropertyCarousel = ({ properties }: PropertyCarouselProps) => {
                     src={property.image}
                     alt={property.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80';
+                    }}
                   />
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-100" />
@@ -211,8 +215,8 @@ export const PropertyCarousel = ({ properties }: PropertyCarouselProps) => {
             }}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === currentIndex
-                ? 'bg-accent w-6'
-                : 'bg-gray-300 hover:bg-gray-400'
+                ? 'bg-accent w-8 shadow-[0_0_10px_rgba(255,215,0,0.5)]'
+                : 'bg-white/20 hover:bg-white/40 backdrop-blur-sm'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

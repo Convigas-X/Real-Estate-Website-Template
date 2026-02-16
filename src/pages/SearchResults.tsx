@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MapPin, 
   Home, 
@@ -11,9 +11,6 @@ import {
   Filter,
   X,
   SlidersHorizontal,
-  ExternalLink,
-  ChevronLeft,
-  ChevronRight,
   Heart,
   Share2,
   Maximize2
@@ -57,6 +54,7 @@ interface Property {
   address: string;
   city: string;
   state: string;
+  stateFull: string;
   zipcode: string;
   price: number;
   bedrooms: number;
@@ -79,165 +77,129 @@ interface SearchFilters {
   status: string;
 }
 
-// Sample properties data with coordinates (Orlando area) - Affordable prices
-const sampleProperties: Property[] = [
-  {
-    id: '1',
-    address: '1234 Lakeview Dr',
-    city: 'Orlando',
-    state: 'FL',
-    zipcode: '32801',
-    price: 225000,
-    bedrooms: 2,
-    bathrooms: 2,
-    sqft: 1250,
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
-    lat: 28.5383,
-    lng: -81.3792,
-    status: 'For Sale',
-    propertyType: 'Single Family'
-  },
-  {
-    id: '2',
-    address: '5678 Park Ave',
-    city: 'Winter Park',
-    state: 'FL',
-    zipcode: '32789',
-    price: 275000,
-    bedrooms: 3,
-    bathrooms: 2,
-    sqft: 1650,
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
-    lat: 28.5975,
-    lng: -81.3514,
-    status: 'For Sale',
-    propertyType: 'Single Family'
-  },
-  {
-    id: '3',
-    address: '9012 Downtown Blvd',
-    city: 'Orlando',
-    state: 'FL',
-    zipcode: '32801',
-    price: 185000,
-    bedrooms: 1,
-    bathrooms: 1,
-    sqft: 850,
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&auto=format&fit=crop&q=80',
-    lat: 28.5421,
-    lng: -81.3745,
-    status: 'For Sale',
-    propertyType: 'Condo'
-  },
-  {
-    id: '4',
-    address: '3456 Lake Nona Way',
-    city: 'Orlando',
-    state: 'FL',
-    zipcode: '32827',
-    price: 245000,
-    bedrooms: 3,
-    bathrooms: 2,
-    sqft: 1450,
-    image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&auto=format&fit=crop&q=80',
-    lat: 28.3607,
-    lng: -81.2464,
-    status: 'Pending',
-    propertyType: 'Townhouse'
-  },
-  {
-    id: '5',
-    address: '7890 Windermere Ln',
-    city: 'Windermere',
-    state: 'FL',
-    zipcode: '34786',
-    price: 295000,
-    bedrooms: 3,
-    bathrooms: 2,
-    sqft: 1750,
-    image: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&auto=format&fit=crop&q=80',
-    lat: 28.4953,
-    lng: -81.5348,
-    status: 'For Sale',
-    propertyType: 'Single Family'
-  },
-  {
-    id: '6',
-    address: '2468 College Park Cir',
-    city: 'Orlando',
-    state: 'FL',
-    zipcode: '32804',
-    price: 195000,
-    bedrooms: 2,
-    bathrooms: 1,
-    sqft: 1150,
-    image: 'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=800&auto=format&fit=crop&q=80',
-    lat: 28.5702,
-    lng: -81.3904,
-    status: 'For Sale',
-    propertyType: 'Single Family'
-  },
-  {
-    id: '7',
-    address: '1357 Thornton Park',
-    city: 'Orlando',
-    state: 'FL',
-    zipcode: '32801',
-    price: 215000,
-    bedrooms: 2,
-    bathrooms: 2,
-    sqft: 1100,
-    image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&auto=format&fit=crop&q=80',
-    lat: 28.5415,
-    lng: -81.3689,
-    status: 'Sold',
-    propertyType: 'Condo'
-  },
-  {
-    id: '8',
-    address: '8642 Dr Phillips Blvd',
-    city: 'Orlando',
-    state: 'FL',
-    zipcode: '32819',
-    price: 595000,
-    bedrooms: 4,
-    bathrooms: 3,
-    sqft: 2300,
-    image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&auto=format&fit=crop&q=80',
-    lat: 28.4506,
-    lng: -81.4924,
-    status: 'For Sale',
-    propertyType: 'Single Family'
+// Florida cities with coordinates
+const FLORIDA_CITIES = [
+  { name: 'Orlando', lat: 28.5384, lng: -81.3789, zip: '32801' },
+  { name: 'Winter Park', lat: 28.5970, lng: -81.3517, zip: '32789' },
+  { name: 'Windermere', lat: 28.4956, lng: -81.5348, zip: '34786' },
+  { name: 'Winter Garden', lat: 28.5653, lng: -81.5862, zip: '34787' },
+  { name: 'Oviedo', lat: 28.6700, lng: -81.2081, zip: '32765' },
+  { name: 'Maitland', lat: 28.6278, lng: -81.3631, zip: '32751' },
+  { name: 'Altamonte Springs', lat: 28.6611, lng: -81.3656, zip: '32701' },
+  { name: 'Kissimmee', lat: 28.2920, lng: -81.4076, zip: '34747' },
+  { name: 'Lake Mary', lat: 28.7589, lng: -81.3178, zip: '32746' },
+  { name: 'Sanford', lat: 28.8027, lng: -81.2695, zip: '32771' },
+  { name: 'Clermont', lat: 28.5494, lng: -81.7729, zip: '34711' },
+  { name: 'Apopka', lat: 28.6761, lng: -81.5117, zip: '32703' },
+  { name: 'Longwood', lat: 28.7031, lng: -81.3384, zip: '32750' },
+  { name: 'Casselberry', lat: 28.6775, lng: -81.3278, zip: '32707' },
+  { name: 'Ocoee', lat: 28.5692, lng: -81.5440, zip: '34761' },
+  { name: 'Gotha', lat: 28.5278, lng: -81.5231, zip: '34734' },
+  { name: 'Bay Lake', lat: 28.4206, lng: -81.5812, zip: '32836' },
+  { name: 'Celebration', lat: 28.3153, lng: -81.5336, zip: '34747' },
+  { name: 'Doctor Phillips', lat: 28.4494, lng: -81.4923, zip: '32819' },
+  { name: 'Horizon West', lat: 28.4264, lng: -81.6176, zip: '34787' },
+];
+
+// Array of high-quality Unsplash property images
+const propertyImages = [
+  'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
+  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
+  'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&q=80',
+  'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80',
+  'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=800&q=80',
+  'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&q=80',
+  'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80',
+  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
+  'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80',
+  'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80',
+  'https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?w=800&q=80',
+  'https://images.unsplash.com/photo-1500382017468-9049fee74a52?w=800&q=80',
+  'https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=800&q=80',
+  'https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80',
+  'https://images.unsplash.com/photo-1472224311454-fa056b7ad33e?w=800&q=80',
+  'https://images.unsplash.com/photo-1513584684032-2979244001b6?w=800&q=80',
+  'https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?w=800&q=80',
+  'https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=800&q=80',
+  'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=800&q=80',
+  'https://images.unsplash.com/photo-1464146072230-91cabc968266?w=800&q=80',
+  'https://images.unsplash.com/photo-1512918766671-ad62eb27bd0f?w=800&q=80',
+  'https://images.unsplash.com/photo-1515263487990-61b07816b324?w=800&q=80',
+  'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80',
+  'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&q=80',
+  'https://images.unsplash.com/photo-1501183007986-d0d080b147f9?w=800&q=80',
+  'https://images.unsplash.com/photo-1430285561322-7808604715df?w=800&q=80',
+  'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80',
+  'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80',
+  'https://images.unsplash.com/photo-1505691722218-269ff0602029?w=800&q=80',
+  'https://images.unsplash.com/photo-1505691938895-1758d7eaa511?w=800&q=80',
+  'https://images.unsplash.com/photo-1507089947368-19c1da977535?w=800&q=80',
+  'https://images.unsplash.com/photo-1475855581690-80accde3ae2b?w=800&q=80',
+  'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=80',
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
+  'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=800&q=80',
+  'https://images.unsplash.com/photo-1501862700950-18382cd41497?w=800&q=80',
+  'https://images.unsplash.com/photo-1510254430417-513bc874814d?w=800&q=80',
+  'https://images.unsplash.com/photo-1432303496139-c7b5bab9970d?w=800&q=80',
+  'https://images.unsplash.com/photo-1472224311454-fa056b7ad33e?w=800&q=80',
+  'https://images.unsplash.com/photo-1512915922686-57c11f9ad6b3?w=800&q=80',
+  'https://images.unsplash.com/photo-1513584684032-2979244001b6?w=800&q=80',
+  'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80',
+  'https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?w=800&q=80',
+  'https://images.unsplash.com/photo-1500382017468-9049fee74a52?w=800&q=80',
+  'https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=800&q=80',
+  'https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80',
+  'https://images.unsplash.com/photo-1472224311454-fa056b7ad33e?w=800&q=80',
+  'https://images.unsplash.com/photo-1513584684032-2979244001b6?w=800&q=80',
+  'https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?w=800&q=80',
+];
+
+const streetNames = [
+  'Oak Street', 'Maple Avenue', 'Sunset Boulevard', 'Highland Drive', 'Park Road',
+  'Lake Shore Drive', 'Palm Avenue', 'Magnolia Lane', 'Cypress Street', 'Birch Road',
+  'Cedar Lane', 'Pine Street', 'Willow Avenue', 'Elm Drive', 'Spruce Road',
+  'Lakeview Drive', 'Ocean Avenue', 'Beach Boulevard', 'Bay Street', 'River Road',
+];
+
+const generateAllProperties = (): Property[] => {
+  const properties: Property[] = [];
+
+  for (let i = 0; i < 100; i++) {
+    const city = FLORIDA_CITIES[i % FLORIDA_CITIES.length];
+    const street = streetNames[i % streetNames.length];
+    const price = 250000 + (Math.random() * 400000);
+    const beds = 2 + Math.floor(Math.random() * 4);
+    const baths = 2 + Math.floor(Math.random() * 3);
+    const sqft = 1200 + Math.floor(Math.random() * 2000);
+    const lat = city.lat + (Math.random() - 0.5) * 0.1;
+    const lng = city.lng + (Math.random() - 0.5) * 0.1;
+
+    properties.push({
+      id: `prop-${i}`,
+      address: `${1000 + i * 11} ${street}`,
+      city: city.name,
+      state: 'FL',
+      stateFull: 'Florida',
+      zipcode: city.zip,
+      price: Math.floor(price),
+      bedrooms: beds,
+      bathrooms: baths,
+      sqft: sqft,
+      image: propertyImages[i],
+      lat: lat,
+      lng: lng,
+      status: i % 10 === 0 ? 'Pending' : i % 15 === 0 ? 'Sold' : 'For Sale',
+      propertyType: ['Single Family', 'Condo', 'Townhouse', 'Estate'][i % 4]
+    });
   }
-];
+  return properties;
+};
 
-const propertyTypes = [
-  { value: 'all', label: 'All Property Types' },
-  { value: 'single-family', label: 'Single Family' },
-  { value: 'condo', label: 'Condominium' },
-  { value: 'townhouse', label: 'Townhouse' },
-  { value: 'land', label: 'Land/Lot' },
-  { value: 'commercial', label: 'Commercial' },
-];
-
-const statusOptions = [
-  { value: 'all', label: 'All Status' },
-  { value: 'active', label: 'Active' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'sold', label: 'Sold' },
-];
+const ALL_PROPERTIES = generateAllProperties();
 
 const priceRanges = [
   { value: '0', label: 'No Min' },
-  { value: '100000', label: '$100,000' },
-  { value: '250000', label: '$250,000' },
-  { value: '500000', label: '$500,000' },
-  { value: '750000', label: '$750,000' },
-  { value: '1000000', label: '$1,000,000' },
-];
-
-const maxPriceRanges = [
-  { value: '999999999', label: 'No Max' },
   { value: '250000', label: '$250,000' },
   { value: '500000', label: '$500,000' },
   { value: '750000', label: '$750,000' },
@@ -245,108 +207,57 @@ const maxPriceRanges = [
   { value: '2000000', label: '$2,000,000' },
 ];
 
-const bedOptions = [
-  { value: '0', label: 'Any' },
-  { value: '1', label: '1+' },
-  { value: '2', label: '2+' },
-  { value: '3', label: '3+' },
-  { value: '4', label: '4+' },
-  { value: '5', label: '5+' },
+const maxPriceRanges = [
+  { value: '999999999', label: 'No Max' },
+  { value: '500000', label: '$500,000' },
+  { value: '1000000', label: '$1,000,000' },
+  { value: '2000000', label: '$2,000,000' },
+  { value: '5000000', label: '$5,000,000' },
+  { value: '10000000', label: '$10,000,000' },
 ];
 
-const bathOptions = [
-  { value: '0', label: 'Any' },
-  { value: '1', label: '1+' },
-  { value: '2', label: '2+' },
-  { value: '3', label: '3+' },
-  { value: '4', label: '4+' },
-];
+const bedOptions = [{ value: '0', label: 'Any' }, { value: '1', label: '1+' }, { value: '2', label: '2+' }, { value: '3', label: '3+' }, { value: '4', label: '4+' }, { value: '5', label: '5+' }];
+const bathOptions = [{ value: '0', label: 'Any' }, { value: '1', label: '1+' }, { value: '2', label: '2+' }, { value: '3', label: '3+' }, { value: '4', label: '4+' }];
 
-// Property Card Component
-const PropertyCard = ({ property, isSelected, onClick }: { 
-  property: Property; 
-  isSelected: boolean;
-  onClick: () => void;
-}) => {
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+const PropertyCard = ({ property, isSelected, onClick }: { property: Property; isSelected: boolean; onClick: () => void }) => {
+  const formatPrice = (price: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 ${
-        isSelected ? 'border-accent ring-2 ring-accent/20' : 'border-transparent'
-      }`}
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className={`group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border ${isSelected ? 'border-accent ring-1 ring-accent' : 'border-gray-100'}`}
       onClick={onClick}
     >
-      {/* Image Container */}
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={property.image}
-          alt={property.address}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+      <div className="relative h-44 sm:h-48 overflow-hidden">
+        <img 
+          src={property.image} 
+          alt={property.address} 
+          className="w-full h-full object-cover" 
+          loading="lazy" 
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80';
+          }}
         />
-        {/* Status Badge */}
-        <div className="absolute top-3 left-3">
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            property.status === 'For Sale' ? 'bg-green-500 text-white' :
-            property.status === 'Pending' ? 'bg-yellow-500 text-white' :
-            'bg-gray-500 text-white'
-          }`}>
+        <div className="absolute top-2 left-2">
+          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase backdrop-blur-md ${property.status === 'For Sale' ? 'bg-emerald-500/90 text-white' : property.status === 'Pending' ? 'bg-amber-500/90 text-white' : 'bg-gray-800/90 text-white'}`}>
             {property.status}
           </span>
         </div>
-        {/* Action Buttons */}
-        <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
-            <Heart className="w-4 h-4 text-gray-600" />
-          </button>
-          <button className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
-            <Share2 className="w-4 h-4 text-gray-600" />
-          </button>
-        </div>
-        {/* Price Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-          <p className="text-2xl font-bold text-white">{formatPrice(property.price)}</p>
+        <div className="absolute bottom-2 left-2 text-white">
+          <p className="font-serif text-lg font-medium tracking-tight drop-shadow-md">{formatPrice(property.price)}</p>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="p-4">
-        <h3 className="font-semibold text-lg text-gray-900 mb-1 truncate">
-          {property.address}
-        </h3>
-        <p className="text-gray-500 text-sm mb-3">
-          {property.city}, {property.state} {property.zipcode}
-        </p>
-        
-        {/* Property Details */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          <div className="flex items-center gap-1">
-            <Bed className="w-4 h-4" />
-            <span>{property.bedrooms} bd</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Bath className="w-4 h-4" />
-            <span>{property.bathrooms} ba</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Maximize2 className="w-4 h-4" />
-            <span>{property.sqft.toLocaleString()} sqft</span>
-          </div>
-        </div>
-
-        {/* Property Type */}
-        <div className="mt-3 pt-3 border-t border-gray-100">
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-            {property.propertyType}
-          </span>
+      <div className="p-3">
+        <h3 className="font-medium text-sm text-gray-900 truncate">{property.address}</h3>
+        <p className="text-gray-500 text-[10px] font-light">{property.city}, {property.state}</p>
+        <div className="h-px w-full bg-gray-50 my-2" />
+        <div className="flex items-center justify-between text-gray-600 text-[10px]">
+          <div className="flex items-center gap-1"><Bed className="w-3 h-3 text-accent" /> <span>{property.bedrooms} bd</span></div>
+          <div className="flex items-center gap-1"><Bath className="w-3 h-3 text-accent" /> <span>{property.bathrooms} ba</span></div>
+          <div className="flex items-center gap-1"><Maximize2 className="w-3 h-3 text-accent" /> <span>{property.sqft.toLocaleString()} ft²</span></div>
         </div>
       </div>
     </motion.div>
@@ -356,36 +267,53 @@ const PropertyCard = ({ property, isSelected, onClick }: {
 const SearchResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [isDesktopFiltersOpen, setIsDesktopFiltersOpen] = useState(false);
-  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(sampleProperties);
+  const [visibleCount, setVisibleCount] = useState(24);
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const markersRef = useRef<L.Marker[]>([]);
+  const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
-  // Initialize filters from URL params
   const [filters, setFilters] = useState<SearchFilters>({
-    location: searchParams.get('city') || searchParams.get('location') || '',
+    location: searchParams.get('location') || searchParams.get('city') || '',
     minPrice: searchParams.get('lp') || '0',
     maxPrice: searchParams.get('hp') || '999999999',
     beds: searchParams.get('bd') || '0',
     baths: searchParams.get('ba') || '0',
-    propertyType: searchParams.get('pt') || 'all',
-    status: searchParams.get('status') || 'all',
+    propertyType: 'all',
+    status: 'all',
   });
 
-  // Initialize map
+  const filteredProperties = useMemo(() => {
+    const searchTerm = filters.location.toLowerCase().trim();
+    return ALL_PROPERTIES.filter(p => {
+      const matchLoc = !searchTerm || 
+        p.address.toLowerCase().includes(searchTerm) ||
+        p.city.toLowerCase().includes(searchTerm) ||
+        p.state.toLowerCase() === searchTerm ||
+        p.stateFull.toLowerCase().includes(searchTerm) ||
+        p.zipcode.includes(searchTerm);
+      
+      const matchPrice = p.price >= parseInt(filters.minPrice) && p.price <= parseInt(filters.maxPrice);
+      const matchBeds = parseInt(filters.beds) === 0 || p.bedrooms >= parseInt(filters.beds);
+      const matchBaths = parseInt(filters.baths) === 0 || p.bathrooms >= parseInt(filters.baths);
+      
+      return matchLoc && matchPrice && matchBeds && matchBaths;
+    });
+  }, [filters]);
+
   useEffect(() => {
     if (mapContainerRef.current && !mapRef.current) {
-      mapRef.current = L.map(mapContainerRef.current).setView([28.5383, -81.3792], 11);
-      
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+      // Default focus on Florida
+      mapRef.current = L.map(mapContainerRef.current, { zoomControl: false }).setView([27.6648, -81.5158], 7);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
       }).addTo(mapRef.current);
+      L.control.zoom({ position: 'topright' }).addTo(mapRef.current);
+      markersLayerRef.current = L.layerGroup().addTo(mapRef.current);
     }
-
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
@@ -394,448 +322,162 @@ const SearchResults = () => {
     };
   }, []);
 
-  // Update markers when filtered properties change
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !markersLayerRef.current) return;
+    markersLayerRef.current.clearLayers();
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-
-    // Add new markers
-    filteredProperties.forEach(property => {
-      const marker = L.marker([property.lat, property.lng])
-        .addTo(mapRef.current!)
+    // To prevent map lag, only render top 150 markers on map if many results
+    const mapMarkers = filteredProperties.slice(0, 150);
+    
+    mapMarkers.forEach(p => {
+      const marker = L.marker([p.lat, p.lng])
         .bindPopup(`
-          <div style="min-width: 200px;">
-            <img src="${property.image}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" />
-            <h3 style="font-weight: bold; margin-bottom: 4px;">${property.address}</h3>
-            <p style="color: #666; font-size: 14px; margin-bottom: 4px;">$${property.price.toLocaleString()}</p>
-            <p style="font-size: 12px; color: #888;">${property.bedrooms} bd | ${property.bathrooms} ba | ${property.sqft.toLocaleString()} sqft</p>
+          <div style="font-family: 'Inter', sans-serif; width: 140px;">
+            <div style="height: 80px; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">
+              <img src="${p.image}" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            <p style="font-weight: 700; font-size: 13px; margin: 0;">$${p.price.toLocaleString()}</p>
+            <p style="margin: 0; font-size: 10px; color: #666;">${p.address}</p>
           </div>
         `);
-      
-      marker.on('click', () => {
-        setSelectedProperty(property.id);
-      });
-      
-      markersRef.current.push(marker);
+      marker.on('click', () => setSelectedProperty(p.id));
+      markersLayerRef.current?.addLayer(marker);
     });
 
-    // Fit bounds to show all markers
-    if (markersRef.current.length > 0) {
-      const group = new L.FeatureGroup(markersRef.current);
-      mapRef.current.fitBounds(group.getBounds().pad(0.1));
+    if (mapMarkers.length > 0) {
+      const group = new L.FeatureGroup(markersLayerRef.current.getLayers() as L.Marker[]);
+      mapRef.current.fitBounds(group.getBounds().pad(0.2), { animate: true });
     }
   }, [filteredProperties]);
 
-  // Filter properties based on filters
   useEffect(() => {
-    let filtered = sampleProperties;
-
-    if (filters.location) {
-      const searchTerm = filters.location.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.address.toLowerCase().includes(searchTerm) ||
-        p.city.toLowerCase().includes(searchTerm) ||
-        p.zipcode.includes(searchTerm)
-      );
-    }
-
-    if (filters.minPrice && filters.minPrice !== '0') {
-      filtered = filtered.filter(p => p.price >= parseInt(filters.minPrice));
-    }
-
-    if (filters.maxPrice && filters.maxPrice !== '999999999') {
-      filtered = filtered.filter(p => p.price <= parseInt(filters.maxPrice));
-    }
-
-    if (filters.beds && filters.beds !== '0') {
-      filtered = filtered.filter(p => p.bedrooms >= parseInt(filters.beds));
-    }
-
-    if (filters.baths && filters.baths !== '0') {
-      filtered = filtered.filter(p => p.bathrooms >= parseInt(filters.baths));
-    }
-
-    if (filters.status && filters.status !== 'all') {
-      filtered = filtered.filter(p => p.status.toLowerCase() === filters.status.toLowerCase());
-    }
-
-    setFilteredProperties(filtered);
-    setIsLoading(false);
-
-    // Count active filters
-    let count = 0;
-    if (filters.location) count++;
-    if (filters.minPrice && filters.minPrice !== '0') count++;
-    if (filters.maxPrice && filters.maxPrice !== '999999999') count++;
-    if (filters.beds && filters.beds !== '0') count++;
-    if (filters.baths && filters.baths !== '0') count++;
-    if (filters.propertyType && filters.propertyType !== 'all') count++;
-    if (filters.status && filters.status !== 'all') count++;
-    setActiveFiltersCount(count);
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 200);
+    return () => clearTimeout(timer);
   }, [filters]);
 
-  const handleFilterChange = (key: keyof SearchFilters, value: string) => {
+  const handleFilterChange = useCallback((key: keyof SearchFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (filters.location) params.set('city', filters.location);
-    if (filters.minPrice && filters.minPrice !== '0') params.set('lp', filters.minPrice);
-    if (filters.maxPrice && filters.maxPrice !== '999999999') params.set('hp', filters.maxPrice);
-    if (filters.beds && filters.beds !== '0') params.set('bd', filters.beds);
-    if (filters.baths && filters.baths !== '0') params.set('ba', filters.baths);
-    if (filters.propertyType && filters.propertyType !== 'all') params.set('pt', filters.propertyType);
-    if (filters.status && filters.status !== 'all') params.set('status', filters.status);
-    
-    setSearchParams(params);
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 500);
-  };
+    setVisibleCount(24); // Reset visible count on filter change
+  }, []);
 
   const clearFilters = () => {
-    setFilters({
-      location: '',
-      minPrice: '0',
-      maxPrice: '999999999',
-      beds: '0',
-      baths: '0',
-      propertyType: 'all',
-      status: 'all',
-    });
+    setFilters({ location: '', minPrice: '0', maxPrice: '999999999', beds: '0', baths: '0', propertyType: 'all', status: 'all' });
     setSearchParams(new URLSearchParams());
   };
 
-  const FilterContent = () => (
-    <div className="space-y-5">
-      {/* Location */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-700" />
-          Location
-        </label>
-        <Input
-          type="text"
-          placeholder="City, ZIP, or Address"
-          value={filters.location}
-          onChange={(e) => handleFilterChange('location', e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-accent focus:ring-accent"
-        />
-      </div>
-
-      {/* Price Range */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-gray-700" />
-          Price Range
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <Select value={filters.minPrice} onValueChange={(value) => handleFilterChange('minPrice', value)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-              <SelectValue placeholder="Min Price" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-gray-200">
-              {priceRanges.map((range) => (
-                <SelectItem key={range.value} value={range.value} className="text-gray-900 hover:bg-gray-100">
-                  {range.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filters.maxPrice} onValueChange={(value) => handleFilterChange('maxPrice', value)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-              <SelectValue placeholder="Max Price" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-gray-200">
-              {maxPriceRanges.map((range) => (
-                <SelectItem key={range.value} value={range.value} className="text-gray-900 hover:bg-gray-100">
-                  {range.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Bedrooms */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <Bed className="w-4 h-4 text-gray-700" />
-          Bedrooms
-        </label>
-        <Select value={filters.beds} onValueChange={(value) => handleFilterChange('beds', value)}>
-          <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-            <SelectValue placeholder="Any" />
-          </SelectTrigger>
-          <SelectContent className="bg-white border-gray-200">
-            {bedOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value} className="text-gray-900 hover:bg-gray-100">
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Bathrooms */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <Bath className="w-4 h-4 text-gray-700" />
-          Bathrooms
-        </label>
-        <Select value={filters.baths} onValueChange={(value) => handleFilterChange('baths', value)}>
-          <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-            <SelectValue placeholder="Any" />
-          </SelectTrigger>
-          <SelectContent className="bg-white border-gray-200">
-            {bathOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value} className="text-gray-900 hover:bg-gray-100">
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Property Type */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <Home className="w-4 h-4 text-gray-700" />
-          Property Type
-        </label>
-        <Select value={filters.propertyType} onValueChange={(value) => handleFilterChange('propertyType', value)}>
-          <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-            <SelectValue placeholder="All Property Types" />
-          </SelectTrigger>
-          <SelectContent className="bg-white border-gray-200">
-            {propertyTypes.map((type) => (
-              <SelectItem key={type.value} value={type.value} className="text-gray-900 hover:bg-gray-100">
-                {type.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Status */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-900">Status</label>
-        <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
-          <SelectTrigger className="bg-white border-gray-300 text-gray-900">
-            <SelectValue placeholder="All Status" />
-          </SelectTrigger>
-          <SelectContent className="bg-white border-gray-200">
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value} className="text-gray-900 hover:bg-gray-100">
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="pt-4 space-y-2">
-        <Button 
-          onClick={handleSearch}
-          className="w-full bg-accent hover:bg-accent/90 text-white"
-        >
-          <Search className="w-4 h-4 mr-2" />
-          Update Search
-        </Button>
-        {activeFiltersCount > 0 && (
-          <Button 
-            variant="outline" 
-            onClick={clearFilters}
-            className="w-full border-gray-300 text-gray-700 hover:bg-gray-100"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Clear All Filters
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filters.location) count++;
+    if (filters.minPrice !== '0') count++;
+    if (filters.maxPrice !== '999999999') count++;
+    if (filters.beds !== '0') count++;
+    if (filters.baths !== '0') count++;
+    return count;
+  }, [filters]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen overflow-hidden bg-white flex flex-col font-sans">
       <Navigation forceDark={true} />
-      
-      {/* Search Header */}
-      <div className="pt-20 pb-4 bg-white border-b border-gray-200 shadow-sm">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          {/* Quick Search Bar */}
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
-            <div className="flex-1 w-full lg:w-auto">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-1">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search by city, ZIP, or address..."
-                    value={filters.location}
-                    onChange={(e) => handleFilterChange('location', e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="pl-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 h-12"
-                  />
-                </div>
-                <Button 
-                  onClick={handleSearch}
-                  className="bg-accent hover:bg-accent/90 text-white h-12 px-8"
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  Search
-                </Button>
-              </div>
+      <div className="h-20 flex-none" />
+      <div className="flex-none bg-white/95 backdrop-blur-md border-b border-gray-100 py-3 shadow-sm z-30">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full md:max-w-md group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-accent" />
+              <input
+                placeholder="Search City, State, or ZIP..."
+                value={filters.location}
+                onChange={(e) => handleFilterChange('location', e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
+              />
             </div>
-
-            {/* Mobile Filters */}
-            <div className="flex items-center gap-2 w-full lg:w-auto">
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hidden sm:inline-block">
+                {filteredProperties.length} Properties Found
+              </span>
               <Sheet open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <SheetTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="lg:hidden border-gray-300 text-gray-700 hover:bg-gray-100"
-                  >
-                    <SlidersHorizontal className="w-4 h-4 mr-2" />
-                    Filters
-                    {activeFiltersCount > 0 && (
-                      <span className="ml-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {activeFiltersCount}
-                      </span>
-                    )}
+                  <Button className="h-9 rounded-full px-5 bg-gray-900 hover:bg-black text-white flex items-center gap-2 shadow-sm">
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span className="text-xs font-bold">Filters</span>
+                    {activeFiltersCount > 0 && <span className="ml-1 bg-accent text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">{activeFiltersCount}</span>}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:w-96 bg-white border-gray-200">
-                  <SheetHeader>
-                    <SheetTitle className="text-gray-900 flex items-center gap-2">
-                      <Filter className="w-5 h-5" />
-                      Filters
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <FilterContent />
+                <SheetContent side="right" className="w-full sm:w-[350px] p-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between pb-4 border-b">
+                      <h3 className="text-lg font-serif">Filters</h3>
+                      <button onClick={clearFilters} className="text-xs text-red-500 font-bold uppercase">Reset</button>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold uppercase text-gray-400">Min Price</label>
+                        <Select value={filters.minPrice} onValueChange={(v) => handleFilterChange('minPrice', v)}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>{priceRanges.map(r => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold uppercase text-gray-400">Max Price</label>
+                        <Select value={filters.maxPrice} onValueChange={(v) => handleFilterChange('maxPrice', v)}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>{maxPriceRanges.map(r => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold uppercase text-gray-400">Beds</label>
+                          <Select value={filters.beds} onValueChange={(v) => handleFilterChange('beds', v)}>
+                            <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>{bedOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold uppercase text-gray-400">Baths</label>
+                          <Select value={filters.baths} onValueChange={(v) => handleFilterChange('baths', v)}>
+                            <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>{bathOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    <Button onClick={() => setIsFiltersOpen(false)} className="w-full bg-gray-900 text-white">View Results</Button>
                   </div>
                 </SheetContent>
               </Sheet>
             </div>
           </div>
-
-          {/* Results Count */}
-          <div className="flex items-center justify-between">
-            <p className="text-gray-600">
-              Showing <span className="font-semibold text-gray-900">{filteredProperties.length}</span> properties
-              {filters.location && ` in "${filters.location}"`}
-            </p>
-            {activeFiltersCount > 0 && (
-              <button 
-                onClick={clearFilters}
-                className="text-sm text-accent hover:text-accent/80 font-medium"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
         </div>
       </div>
-
-      {/* Main Content - Split View */}
-      <div className="flex h-[calc(100vh-180px)]">
-        {/* Map Section - Left Side */}
-        <div className="hidden lg:block w-1/2 relative bg-gray-100">
-          <div ref={mapContainerRef} className="absolute inset-0" />
-          
-          {/* Map Controls */}
-          <div className="absolute top-4 right-4 z-[400] flex flex-col gap-2">
-            <button 
-              className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
-              onClick={() => mapRef.current?.zoomIn()}
-            >
-              <span className="text-xl font-bold text-gray-700">+</span>
-            </button>
-            <button 
-              className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
-              onClick={() => mapRef.current?.zoomOut()}
-            >
-              <span className="text-xl font-bold text-gray-700">−</span>
-            </button>
-          </div>
+      <div className="flex-1 flex overflow-hidden bg-gray-50">
+        <div className="hidden lg:block w-[45%] h-full relative p-3 pr-1.5">
+           <div ref={mapContainerRef} className="h-full w-full bg-white rounded-[1.5rem] overflow-hidden shadow-sm border border-gray-100" />
         </div>
-
-        {/* Properties List - Right Side */}
-        <div className="flex-1 lg:w-1/2 bg-gray-50 overflow-y-auto">
-          {/* Desktop Filters Toggle */}
-          <div className="hidden lg:flex sticky top-0 z-10 bg-white border-b border-gray-200 p-4 items-center justify-between">
-            <button
-              onClick={() => setIsDesktopFiltersOpen(!isDesktopFiltersOpen)}
-              className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-5 py-2.5 rounded-full font-medium transition-all duration-300 hover:shadow-lg hover:shadow-accent/25"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              {isDesktopFiltersOpen ? 'Hide Filters' : 'Show Filters'}
-              {activeFiltersCount > 0 && (
-                <span className="ml-1 bg-white text-accent text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
-            
-            {activeFiltersCount > 0 && (
-              <button 
-                onClick={clearFilters}
-                className="text-sm text-gray-600 hover:text-gray-900 font-medium"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
-
-          {/* Desktop Filters Panel - Collapsible */}
-          <div className={`hidden lg:block bg-gray-50 border-b border-gray-200 overflow-hidden transition-all duration-300 ${isDesktopFiltersOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="p-4">
-              <FilterContent />
-            </div>
-          </div>
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading properties...</p>
-              </div>
-            </div>
-          )}
-
-          {/* Properties Grid */}
-          {!isLoading && (
-            <div className="p-4">
-              {filteredProperties.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg mb-2">No properties found</p>
-                  <p className="text-gray-400">Try adjusting your filters</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredProperties.map((property) => (
-                    <PropertyCard
-                      key={property.id}
-                      property={property}
-                      isSelected={selectedProperty === property.id}
-                      onClick={() => setSelectedProperty(property.id)}
-                    />
+        <div className="flex-1 h-full overflow-y-auto bg-transparent p-3 pl-1.5">
+           {isLoading ? (
+             <div className="flex items-center justify-center h-full"><div className="w-8 h-8 border-2 border-gray-200 border-t-accent rounded-full animate-spin"></div></div>
+           ) : filteredProperties.length === 0 ? (
+             <div className="flex flex-col items-center justify-center h-full text-center px-6">
+               <h3 className="text-lg font-serif text-gray-900">No properties found</h3>
+                <Button onClick={clearFilters} className="mt-4 bg-accent text-white rounded-full h-9">Clear All</Button>
+             </div>
+           ) : (
+             <div className="bg-white rounded-[1.5rem] shadow-sm border border-gray-100 min-h-full p-5">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredProperties.slice(0, visibleCount).map(p => (
+                    <PropertyCard key={p.id} property={p} isSelected={selectedProperty === p.id} onClick={() => setSelectedProperty(p.id)} />
                   ))}
-                </div>
-              )}
-            </div>
-          )}
+               </div>
+               {visibleCount < filteredProperties.length && (
+                 <div className="flex justify-center mt-8 pb-8">
+                    <Button onClick={() => setVisibleCount(prev => prev + 24)} variant="outline" className="rounded-full px-8 border-gray-200 text-xs font-bold uppercase tracking-widest hover:bg-gray-50">Load More Listings</Button>
+                 </div>
+               )}
+             </div>
+           )}
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

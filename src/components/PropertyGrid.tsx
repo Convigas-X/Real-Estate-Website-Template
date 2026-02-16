@@ -42,7 +42,7 @@ export const PropertyGrid = ({ properties }: PropertyGridProps) => {
     >
       <Link
         to={property.linkUrl || '/search'}
-        className="block relative overflow-hidden rounded-xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500"
+        className="block relative overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-500"
         style={{ height }}
       >
         {/* Image Container */}
@@ -51,6 +51,10 @@ export const PropertyGrid = ({ properties }: PropertyGridProps) => {
             src={property.image}
             alt={property.name}
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80';
+            }}
           />
           
           {/* Gradient Overlay */}
@@ -59,7 +63,7 @@ export const PropertyGrid = ({ properties }: PropertyGridProps) => {
 
         {/* Status Badge */}
         <div className="absolute top-3 left-3 z-20">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase shadow-md backdrop-blur-sm ${
+          <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold tracking-wider uppercase shadow-md backdrop-blur-sm ${
             property.status === 'For Sale'
               ? 'bg-green-500/90 text-white'
               : 'bg-gray-600/90 text-white'
@@ -127,7 +131,7 @@ export const PropertyGrid = ({ properties }: PropertyGridProps) => {
         </div>
 
         {/* Hover Border Effect */}
-        <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-accent/50 transition-colors duration-500 pointer-events-none" />
+        <div className="absolute inset-0 border-2 border-transparent group-hover:border-accent/50 transition-colors duration-500 pointer-events-none" />
       </Link>
     </div>
   );
@@ -196,7 +200,7 @@ export const PropertyGrid = ({ properties }: PropertyGridProps) => {
       <div className="mt-10 text-center">
         <Link
           to="/search"
-          className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-accent/25"
+          className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white px-8 py-4 font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-accent/25"
         >
           View All Properties
           <ArrowRight className="w-5 h-5" />

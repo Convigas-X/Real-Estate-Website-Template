@@ -104,23 +104,6 @@ export const AboutVideoSection = () => {
             {/* Description removed as requested */}
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-10 py-6 sm:py-8 border-y border-gray-200 mb-6 sm:mb-8">
-            {[
-              { value: '35+', label: 'Years Experience' },
-              { value: '1,000+', label: 'Families Helped' },
-              { value: '360°', label: 'Full Service' },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="text-center"
-              >
-                <p className="font-serif text-xl sm:text-2xl md:text-4xl text-primary">{stat.value}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mt-1 sm:mt-2">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-
           {/* CTA Button */}
           <Link to="/about">
             <motion.button

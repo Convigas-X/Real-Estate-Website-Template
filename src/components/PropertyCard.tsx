@@ -27,6 +27,10 @@ export const PropertyCard = ({
           src={image}
           alt={name}
           className="property-image w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80';
+          }}
         />
         
         {/* Status Badge */}

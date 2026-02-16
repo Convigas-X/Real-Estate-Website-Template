@@ -10,8 +10,7 @@ const footerLinks = {
   ],
   properties: [
     { name: 'Featured Listings', href: '/listings' },
-    { name: 'Sold/Pending', href: '/listings/sold' },
-    { name: 'Advanced Search', href: '/idx-wrapper' },
+    { name: 'Search Properties', href: '/search' },
     { name: 'Off-Market', href: '/off-market' },
   ],
   resources: [
@@ -165,7 +164,7 @@ export const Footer = () => {
             <div className="sm:ml-auto mt-2 sm:mt-0">
               <a 
                 href="tel:+13212286880"
-                className="inline-flex items-center gap-2 bg-gold text-primary px-4 sm:px-5 py-2 sm:py-2.5 font-sans text-xs sm:text-sm font-medium rounded hover:bg-gold/90 transition-colors"
+                className="inline-flex items-center gap-2 bg-gold text-primary px-4 sm:px-5 py-2 sm:py-2.5 font-sans text-xs sm:text-sm font-medium hover:bg-gold/90 transition-colors"
               >
                 <Phone size={14} className="sm:w-4 sm:h-4" />
                 Call Now
@@ -179,14 +178,9 @@ export const Footer = () => {
           <p className="font-sans text-[10px] sm:text-xs text-white/40">
             © 2026 RealEstate 360. All rights reserved.
           </p>
-          <a 
-            href="https://www.tritaniumglobal.com" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-sans text-[10px] sm:text-xs text-white/40 hover:text-gold transition-colors duration-200"
-          >
-            Designed by Tritanium Global
-          </a>
+          <span className="font-sans text-[10px] sm:text-xs text-white/40">
+            Designed by Convigas-X
+          </span>
         </div>
       </div>
     </footer>

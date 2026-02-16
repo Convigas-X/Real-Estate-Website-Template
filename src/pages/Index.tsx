@@ -6,17 +6,19 @@ import { StatsSection } from '@/components/StatsSection';
 import { FeaturedListings } from '@/components/FeaturedListings';
 import { ForbesSection } from '@/components/ForbesSection';
 import { Footer } from '@/components/Footer';
+import { BackgroundMusic } from '@/components/BackgroundMusic';
 
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <BackgroundMusic />
       <Navigation />
       <main>
         <HeroSection />
         <PartnersMarquee />
         <AboutVideoSection />
-        <StatsSection />
         <FeaturedListings />
+        <StatsSection />
         <ForbesSection />
       </main>
       <Footer />
