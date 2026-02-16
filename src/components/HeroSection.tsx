@@ -3,40 +3,38 @@ import { motion } from 'framer-motion';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' as const } }
 };
 
 const fadeInLeft = {
   hidden: { opacity: 0, x: -30 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: 'easeOut' } }
+  visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: 'easeOut' as const } }
 };
 
 const fadeIn = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 1, ease: 'easeOut' } }
+  visible: { opacity: 1, transition: { duration: 1, ease: 'easeOut' as const } }
 };
 
 export const HeroSection = () => {
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Background Video */}
+      {/* Background Video - YouTube Embed */}
       <motion.div 
         className="absolute inset-0"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <div className="w-full h-full">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          >
-            <source src="/herosection.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+        <div className="w-full h-full relative">
+          <iframe
+            src="https://www.youtube.com/embed/vw0LXVVuKjc?autoplay=1&mute=1&loop=1&playlist=vw0LXVVuKjc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+            title="Hero Background Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="absolute top-1/2 left-1/2 w-[150vw] h-[150vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ border: 'none' }}
+          />
         </div>
         {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/50" />
