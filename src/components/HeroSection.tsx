@@ -26,15 +26,24 @@ export const HeroSection = () => {
         animate="visible"
         variants={fadeIn}
       >
-        <div className="w-full h-full relative">
-          <iframe
-            src="https://www.youtube.com/embed/vw0LXVVuKjc?autoplay=1&mute=1&loop=1&playlist=vw0LXVVuKjc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
-            title="Hero Background Video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            className="absolute top-1/2 left-1/2 w-[150vw] h-[150vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ border: 'none' }}
-          />
+        <div className="w-full h-full relative overflow-hidden">
+          {/* Video wrapper to maintain aspect ratio */}
+          <div className="absolute inset-0 w-full h-full">
+            <iframe
+              src="https://www.youtube.com/embed/vw0LXVVuKjc?autoplay=1&mute=1&loop=1&playlist=vw0LXVVuKjc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&cc_load_policy=0"
+              title="Hero Background Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="absolute top-1/2 left-1/2 w-full h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              style={{
+                border: 'none',
+                width: '100vw',
+                height: '56.25vw', /* 16:9 aspect ratio */
+                minHeight: '100vh',
+                minWidth: '177.78vh', /* 16:9 aspect ratio */
+              }}
+            />
+          </div>
         </div>
         {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/50" />
