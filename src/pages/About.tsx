@@ -1,6 +1,6 @@
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
-import heroImage from '/herosection.jpg';
+import heroImage from '/Property.jpg';
 import { Award, Users, Target, Heart } from 'lucide-react';
 
 const values = [

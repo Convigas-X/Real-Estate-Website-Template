@@ -17,7 +17,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 export const FeaturedListings = () => {
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<typeof staticProperties>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

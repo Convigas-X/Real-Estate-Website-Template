@@ -1,7 +1,7 @@
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { blogPosts } from '@/data/blog';
-import heroImage from '/herosection.jpg';
+import heroImage from '/Property.jpg';
 
 const Blog = () => {
   return (

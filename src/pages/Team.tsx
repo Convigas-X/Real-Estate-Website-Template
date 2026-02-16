@@ -2,7 +2,7 @@ import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Mail, Phone, Award, Target, Users, Shield, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import heroImage from '/herosection.jpg';
+import heroImage from '/Property.jpg';
 
 const teamMembers = [
   {

@@ -9,6 +9,7 @@ export interface Property {
   image: string;
   status: 'For Sale' | 'Sold';
   mlsUrl?: string;
+  linkUrl?: string;
 }
 
 // Array of high-quality Unsplash property images for reliability
