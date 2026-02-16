@@ -30,7 +30,7 @@ export const HeroSection = () => {
           {/* Video wrapper to maintain aspect ratio */}
           <div className="absolute inset-0 w-full h-full">
             <iframe
-              src="https://www.youtube.com/embed/vw0LXVVuKjc?autoplay=1&mute=1&loop=1&playlist=vw0LXVVuKjc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&cc_load_policy=0"
+              src="https://www.youtube.com/embed/vw0LXVVuKjc?autoplay=1&mute=1&loop=1&playlist=vw0LXVVuKjc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&cc_load_policy=0&vq=hd1080"
               title="Hero Background Video"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
